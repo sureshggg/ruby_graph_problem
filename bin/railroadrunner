@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/graph"
+require_relative "../lib/dijkstra"
+require_relative "../lib/bfs_visitor"
+
+# Helper method to handle no route. Decorator method
+def get_path_weight(graph, path_array)
+  result = graph.get_path_weight(path_array)
+  result.nil? ? "NO SUCH ROUTE" : result
+end
+
+puts "RailRoad Runner"
+puts "---------------"
+
+puts "Please input vertices with following format"
+puts "Eg. A B 10"
+
+graph = Graph.new
+while line=gets()
+  edge_array=line.strip.split(" ")
+  break if edge_array.length != 3
+  graph.add_edge(edge_array[0], edge_array[1], edge_array[2].to_i)
+end
+
+bfs_visitor = BfsVisitor.new(graph)
+
+puts "1. The distance of the route A-B-C"
+puts "Output #1: #{get_path_weight(graph, ['A','B','C'])}"
+
+puts "2. The distance of the route A-D"
+puts "Output #2: #{get_path_weight(graph, ['A','D'])}"
+
+puts "3. The distance of the route A-D-C"
+puts "Output #3: #{get_path_weight(graph, ['A','D','C'])}"
+
+puts "4. The distance of the route A-E-B-C-D"
+puts "Output #4: #{get_path_weight(graph, ['A','E','B', 'C', 'D'])}"
+
+puts "5. The distance of the route A-E-D"
+puts "Output #5: #{get_path_weight(graph, ['A','E','D'])}"
+
+puts "6. Number of trips  C to C, maximum of 3 stops"
+paths = bfs_visitor.get_paths("C","C"){ |w,l| l<=3 } 
+puts "Output #6: #{paths.length}"
+
+puts "7. Number of trips A to C, exactly  4 stops"
+paths = bfs_visitor.get_paths("A","C", proc{|w,l| l<=4}){ |w,l| l==4 } 
+puts "Output #7: #{paths.length}"
+
+puts "8. Shortest route  distance A to C"
+dijkstra_algm = DijkstraAlgorithm.new(graph, "A")
+puts "Output #8: #{dijkstra_algm.shortest_distance_to('C')}"
+
+puts "9. Shortest route  distance B to B"
+dijkstra_algm = DijkstraAlgorithm.new(graph, "B")
+puts "Output #9: #{dijkstra_algm.shortest_distance_to('B')}"
+
+puts  "10. The number of  different routes C to C"
+paths = bfs_visitor.get_paths("C", "C"){ |w,l| w<30}
+puts "Output #10: #{paths.length}" 
+
